@@ -1,0 +1,25 @@
+# VAULT_VERSION should match a release name in the HashiCorp Releases page (ex. "1.14.1+ent" for enterprise)
+ARG VAULT_VERSION=1.14.1
+# amd64 386 or arm
+ARG ARCH=amd64
+# UID for the vault system user & GID for the vault group
+ARG VAULT_UID=471
+
+PKG unzip
+
+CMD cd /tmp && fetch https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_freebsd_${ARCH}.zip
+
+CMD unzip /tmp/vault_${VAULT_VERSION}_freebsd_${ARCH}.zip -d /usr/local/bin/
+
+# Create vault system account
+CMD pw adduser vault -u ${VAULT_UID} -d /nonexistent -s /usr/sbin/nologin -c "Vault Daemon"
+
+# Copy default vault.hcl & vault rc.d file
+CP usr /
+# Ensure vault RC file is executable
+CMD chmod +x /usr/local/etc/rc.d/vault
+# Create database directory
+CMD mkdir -p /var/db/vault && chown -R vault:vault /var/db/vault
+
+SYSRC vault_enable=YES
+SERVICE vault start
