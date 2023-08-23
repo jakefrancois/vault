@@ -6,6 +6,9 @@ listener "tcp" {
   tls_disable = "true"
 }
 
-storage "file" {
+storage "raft" {
   path = "/var/db/vault"
+  node_id = "raft_node_1"
 }
+
+cluster_addr = "http://127.0.0.1:8201"
